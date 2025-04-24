@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medication Label Scanner</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .camera-container {
+            position: relative;
+            width: 100%;
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        #video {
+            width: 100%;
+            display: block;
+        }
+        #canvas {
+            display: none;
+        }
+        .capture-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #fff;
+            border: none;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .capture-btn:before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 50%;
+            border: 2px solid #e0e0e0;
+        }
+        .capture-btn:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+        .guide-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px dashed #fff;
+            border-radius: 8px;
+            margin: 40px;
+            pointer-events: none;
+        }
+        .voice-guide {
+            background-color: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 20px;
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            white-space: nowrap;
+        }
+        .results-container {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            display: none;
+        }
+        .results-container h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            color: #2c3e50;
+        }
+        .info-item {
+            margin-bottom: 15px;
+        }
+        .info-item h3 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            color: #7f8c8d;
+        }
+        .info-item p {
+            margin: 0;
+            font-size: 18px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0,0,0,.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error-message {
+            background-color: #fadbd8;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+        }
+        .scan-again {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+        .read-aloud {
+            background-color: #3498db;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Medication Label Scanner</h1>
+            <p>Scan your medication label to get detailed information</p>
+        </header>
+        
+        <div class="camera-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+            <div class="guide-overlay"></div>
+            <div class="voice-guide">Position the medication label in the frame</div>
+            <button id="capture-btn" class="capture-btn"></button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing medication label...</p>
+        </div>
+        
+        <div class="error-message" id="error-message"></div>
+        
+        <div class="results-container" id="results-container">
+            <h2>Medication Information</h2>
+            <div id="results-content"></div>
+            
+            <div class="action-buttons">
+                <button class="action-btn scan-again" id="scan-again">Scan Another</button>
+                <button class="action-btn read-aloud" id="read-aloud">Read Aloud</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const captureBtn = document.getElementById('capture-btn');
+            const loadingDiv = document.getElementById('loading');
+            const resultsContainer = document.getElementById('results-container');
+            const resultsContent = document.getElementById('results-content');
+            const errorMessage = document.getElementById('error-message');
+            const scanAgainBtn = document.getElementById('scan-again');
+            const readAloudBtn = document.getElementById('read-aloud');
+            const voiceGuide = document.querySelector('.voice-guide');
+            
+            let stream = null;
+            let medicationData = null;
+            
+            // Voice guidance function
+            function speakGuidance(text) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.9;
+                    speechSynthesis.speak(utterance);
+                }
+            }
+            
+            // Start camera
+            async function startCamera() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" }
+                    });
+                    video.srcObject = stream;
+                    
+                    // Speak initial guidance
+                    setTimeout(() => {
+                        speakGuidance("Please position the medication label clearly in the frame and tap the button to scan");
+                    }, 1000);
+                    
+                } catch (err) {
+                    console.error("Error accessing camera:", err);
+                    errorMessage.textContent = "Error accessing camera. Please make sure you've granted camera permissions.";
+                    errorMessage.style.display = "block";
+                }
+            }
+            
+            // Stop camera
+            function stopCamera() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    video.srcObject = null;
+                }
+            }
+            
+            // Capture image
+            captureBtn.addEventListener('click', async function() {
+                // Set canvas dimensions to match video
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                // Draw video frame to canvas
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Convert to base64
+                const imageData = canvas.toDataURL('image/jpeg', 0.9);
+                
+                // Show loading state
+                loadingDiv.style.display = 'block';
+                errorMessage.style.display = 'none';
+                
+                // Play sound and speak guidance
+                speakGuidance("Scanning medication label");
+                
+                try {
+                    // Send to backend
+                    const response = await fetch('/api/process/scan-medication', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ imageData })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.error || 'Failed to analyze medication label');
+                    }
+                    
+                    // Hide loading, show results
+                    loadingDiv.style.display = 'none';
+                    
+                    // Store medication data
+                    medicationData = result.structured ? result.data : parseUnstructuredText(result.rawText);
+                    
+                    // Display results
+                    displayMedicationInfo(medicationData);
+                    resultsContainer.style.display = 'block';
+                    
+                    // Stop camera
+                    stopCamera();
+                    
+                    // Announce completion
+                    speakGuidance("Medication label scanned successfully");
+                    
+                } catch (error) {
+                    loadingDiv.style.display = 'none';
+                    errorMessage.textContent = error.message || 'An error occurred while scanning the label';
+                    errorMessage.style.display = 'block';
+                    speakGuidance("Error scanning label. Please try again.");
+                }
+            });
+            
+            // Parse unstructured text (fallback)
+            function parseUnstructuredText(text) {
+                // Simple fallback parser - in production you might want something more robust
+                return {
+                    medicationName: extractSection(text, "Medication Name"),
+                    activeIngredients: extractSection(text, "Active Ingredients"),
+                    dosageForm: extractSection(text, "Dosage Form"),
+                    strength: extractSection(text, "Strength"),
+                    expirationDate: extractSection(text, "Expiration Date"),
+                    storageInstructions: extractSection(text, "Storage Instructions"),
+                    administrationInstructions: extractSection(text, "Administration Instructions"),
+                    warnings: extractSection(text, "Warnings"),
+                    manufacturer: extractSection(text, "Manufacturer"),
+                    batchNumber: extractSection(text, "Batch Number")
+                };
+            }
+            
+            // Helper to extract sections from text
+            function extractSection(text, sectionName) {
+                const regex = new RegExp(`${sectionName}[:\\s]+(.*?)(?=\\n\\w|$)`, 'i');
+                const match = text.match(regex);
+                return match ? match[1].trim() : "Not found";
+            }
+            
+            // Display medication information
+            function displayMedicationInfo(data) {
+                resultsContent.innerHTML = '';
+                
+                // Define the fields to display
+                const fields = [
+                    { key: 'medicationName', label: 'Medication Name' },
+                    { key: 'activeIngredients', label: 'Active Ingredients' },
+                    { key: 'dosageForm', label: 'Dosage Form' },
+                    { key: 'strength', label: 'Strength/Concentration' },
+                    { key: 'expirationDate', label: 'Expiration Date' },
+                    { key: 'storageInstructions', label: 'Storage Instructions' },
+                    { key: 'administrationInstructions', label: 'Administration Instructions' },
+                    { key: 'warnings', label: 'Warnings/Precautions' },
+                    { key: 'manufacturer', label: 'Manufacturer' },
+                    { key: 'batchNumber', label: 'Batch/Lot Number' }
+                ];
+                
+                // Create HTML for each field
+                fields.forEach(field => {
+                    const value = data[field.key] || 'Not found';
+                    if (value !== 'Not found') {
+                        const infoItem = document.createElement('div');
+                        infoItem.className = 'info-item';
+                        
+                        const heading = document.createElement('h3');
+                        heading.textContent = field.label;
+                        
+                        const content = document.createElement('p');
+                        content.textContent = value;
+                        
+                        infoItem.appendChild(heading);
+                        infoItem.appendChild(content);
+                        resultsContent.appendChild(infoItem);
+                    }
+                });
+            }
+            
+            // Scan again button
+            scanAgainBtn.addEventListener('click', function() {
+                resultsContainer.style.display = 'none';
+                startCamera();
+            });
+            
+            // Read aloud button
+            readAloudBtn.addEventListener('click', function() {
+                if (!medicationData) return;
+                
+                // Stop any ongoing speech
+                if ('speechSynthesis' in window) {
+                    speechSynthesis.cancel();
+                }
+                
+                // Create text to read
+                let textToRead = `Medication information for ${medicationData.medicationName || 'your medication'}.`;
+                
+                if (medicationData.activeIngredients && medicationData.activeIngredients !== 'Not found') {
+                    textToRead += ` Active ingredients: ${medicationData.activeIngredients}.`;
+                }
+                
+                if (medicationData.dosageForm && medicationData.dosageForm !== 'Not found') {
+                    textToRead += ` This is a ${medicationData.dosageForm}.`;
+                }
+                
+                if (medicationData.administrationInstructions && medicationData.administrationInstructions !== 'Not found') {
+                    textToRead += ` Administration instructions: ${medicationData.administrationInstructions}.`;
+                }
+                
+                if (medicationData.expirationDate && medicationData.expirationDate !== 'Not found') {
+                    textToRead += ` Expiration date: ${medicationData.expirationDate}.`;
+                }
+                
+                if (medicationData.warnings && medicationData.warnings !== 'Not found') {
+                    textToRead += ` Warnings: ${medicationData.warnings}.`;
+                }
+                
+                speakGuidance(textToRead);
+            });
+            
+            // Initialize
+            startCamera();
+        });
+    </script>
+</body>
+</html>
