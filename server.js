@@ -1,28 +1,24 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
+const cors = require('cors'); 
 const path = require('path');
 
-// Import routes
-const processImageRouter = require('./route/processImage');
-
-// Create the Express application
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Route Imports
+const processImageRouter = require('./route/processImage'); 
+const medicationRouter = require('./route/medications'); 
+const authRouter = require('./route/auth'); 
+
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '50mb' })); // Increased limit for base64 images
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
+app.use(express.json());
 
 // API routes
 app.use('/api/process', processImageRouter);
-
-// Basic route for testing
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'OCR API is running' });
-});
+app.use('/api/medication', medicationRouter);
+app.use('/api/auth', authRouter);
 
 // Handle root route - serve the test interface
 app.get('/', (req, res) => {
@@ -42,7 +38,7 @@ app.use((err, req, res, next) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`OCR Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
   console.log(`API available at http://localhost:${PORT}/api`);
   console.log(`Web interface available at http://localhost:${PORT}`);
 });

@@ -4,167 +4,234 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medication Label Scanner</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        .app-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .camera-container {
-            position: relative;
-            width: 100%;
-            background-color: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        #video {
-            width: 100%;
-            display: block;
-        }
-        #canvas {
-            display: none;
-        }
-        .capture-btn {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #fff;
-            border: none;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        .capture-btn:before {
-            content: '';
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            right: 5px;
-            bottom: 5px;
-            border-radius: 50%;
-            border: 2px solid #e0e0e0;
-        }
-        .capture-btn:active {
-            transform: translateX(-50%) scale(0.95);
-        }
-        .guide-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px dashed #fff;
-            border-radius: 8px;
-            margin: 40px;
-            pointer-events: none;
-        }
-        .voice-guide {
-            background-color: rgba(0,0,0,0.6);
-            color: #fff;
-            padding: 10px 15px;
-            border-radius: 20px;
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 16px;
-            white-space: nowrap;
-        }
-        .results-container {
-            background-color: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-top: 30px;
-            display: none;
-        }
-        .results-container h2 {
-            margin-top: 0;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-            color: #2c3e50;
-        }
-        .info-item {
-            margin-bottom: 15px;
-        }
-        .info-item h3 {
-            margin: 0 0 5px 0;
-            font-size: 16px;
-            color: #7f8c8d;
-        }
-        .info-item p {
-            margin: 0;
-            font-size: 18px;
-        }
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(0,0,0,.1);
-            border-radius: 50%;
-            border-top-color: #3498db;
-            animation: spin 1s ease-in-out infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .error-message {
-            background-color: #fadbd8;
-            color: #c0392b;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: none;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .action-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            text-align: center;
-        }
-        .scan-again {
-            background-color: #ecf0f1;
-            color: #2c3e50;
-        }
-        .read-aloud {
-            background-color: #3498db;
-            color: white;
-        }
-    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
+<style>
+    body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+}
+.app-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+.camera-container {
+    position: relative;
+    width: 100%;
+    background-color: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+#video {
+    width: 100%;
+    display: block;
+}
+#canvas {
+    display: none;
+}
+.capture-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fff;
+    border: none;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.capture-btn:before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border-radius: 50%;
+    border: 2px solid #e0e0e0;
+}
+.capture-btn:active {
+    transform: translateX(-50%) scale(0.95);
+}
+.guide-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px dashed #fff;
+    border-radius: 8px;
+    margin: 40px;
+    pointer-events: none;
+}
+.voice-guide {
+    background-color: rgba(0,0,0,0.6);
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 20px;
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    white-space: nowrap;
+}
+.results-container {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-top: 30px;
+    display: none;
+}
+.results-container h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    color: #2c3e50;
+}
+.info-item {
+    margin-bottom: 15px;
+}
+.info-item h3 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #7f8c8d;
+}
+.info-item p {
+    margin: 0;
+    font-size: 18px;
+}
+.loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+.spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0,0,0,.1);
+    border-radius: 50%;
+    border-top-color: #3498db;
+    animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.error-message {
+    background-color: #fadbd8;
+    color: #c0392b;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    display: none;
+}
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.action-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+}
+.scan-again {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+}
+.read-aloud {
+    background-color: #3498db;
+    color: white;
+}
+/* Add new styles for raw text display */
+.raw-response {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    font-size: 14px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.debug-section {
+    margin-top: 20px;
+    padding: 15px;
+    border-top: 1px dashed #ccc;
+}
+
+.debug-toggle {
+    background: none;
+    border: none;
+    color: #7f8c8d;
+    cursor: pointer;
+    padding: 5px 10px;
+    font-size: 14px;
+    text-decoration: underline;
+}
+
+/* Auth related styles */
+.auth-section {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-section button {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    background-color: #3498db;
+    color: white;
+}
+
+.auth-section button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.auth-status {
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+</style>
 <body>
     <div class="app-container">
         <header>
@@ -172,7 +239,14 @@
             <p>Scan your medication label to get detailed information</p>
         </header>
         
-        <div class="camera-container">
+        <!-- Authentication Section -->
+        <div class="auth-section" id="auth-section">
+            <h2>Authentication</h2>
+            <p class="auth-status" id="auth-status">Not logged in</p>
+            <button id="login-btn">Login with Demo Account</button>
+        </div>
+        
+        <div class="camera-container" id="camera-container" style="display: none;">
             <video id="video" autoplay playsinline></video>
             <canvas id="canvas"></canvas>
             <div class="guide-overlay"></div>
@@ -200,6 +274,21 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Firebase config - REPLACE WITH YOUR CONFIG
+            const firebaseConfig = {
+                apiKey: "AIzaSyDzuuTOiiNq9HHJ9sGRsCpMHsIB_drWrUM",
+                authDomain: "audired-820e0.firebaseapp.com",
+                projectId: "audired-820e0",
+                storageBucket: "audired-820e0.firebasestorage.app",
+                messagingSenderId: "401028140081",
+                appId: "1:401028140081:web:16b491c3051c82ae39d910",
+                measurementId: "G-RBYM3C85BT"
+            };
+            
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
             const captureBtn = document.getElementById('capture-btn');
@@ -210,15 +299,109 @@
             const scanAgainBtn = document.getElementById('scan-again');
             const readAloudBtn = document.getElementById('read-aloud');
             const voiceGuide = document.querySelector('.voice-guide');
+            const cameraContainer = document.getElementById('camera-container');
+            const authSection = document.getElementById('auth-section');
+            const authStatus = document.getElementById('auth-status');
+            const loginBtn = document.getElementById('login-btn');
             
             let stream = null;
             let medicationData = null;
+            let currentUser = null;
+            
+            // Authentication functions
+            loginBtn.addEventListener('click', async function() {
+                try {
+                    // User login with Google
+                    const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+                    currentUser = result.user;
+                    
+                    // Get ID token
+                    const idToken = await currentUser.getIdToken();
+                    console.log("ID Token:", idToken);
+
+                    // Send the ID token to backend to authenticate
+                    const response = await fetch('/api/auth/google-login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ idToken })
+                    });
+
+                    const resultData = await response.json();
+                    console.log("Backend response:", resultData);
+
+                    if (response.ok) {
+                        authStatus.textContent = `Logged in as: ${resultData.email}`;
+                        loginBtn.textContent = "Logout";
+                        // Add logout functionality here
+                    } else {
+                        errorMessage.textContent = resultData.error || "Login failed";
+                        errorMessage.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error("Auth error:", error);
+                    authStatus.textContent = `Auth error: ${error.message}`;
+                }
+            });
+            // Auth state observer
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    // User is signed in
+                    currentUser = user;
+                    authStatus.textContent = `Logged in as: ${user.email}`;
+                    loginBtn.textContent = "Logout";
+                    loginBtn.removeEventListener('click', loginUser);
+                    loginBtn.addEventListener('click', logoutUser);
+                    
+                    // Show camera after auth
+                    cameraContainer.style.display = 'block';
+                    authSection.style.display = 'none';
+                    
+                    // Start camera
+                    startCamera();
+                } else {
+                    // User is signed out
+                    currentUser = null;
+                    authStatus.textContent = "Not logged in";
+                    loginBtn.textContent = "Login with Demo Account";
+                    loginBtn.removeEventListener('click', logoutUser);
+                    loginBtn.addEventListener('click', loginUser);
+                    
+                    // Hide camera when logged out
+                    cameraContainer.style.display = 'none';
+                    authSection.style.display = 'block';
+                    
+                    // Stop camera if running
+                    stopCamera();
+                }
+            });
+            
+            async function loginUser() {
+                try {
+                    // For demo purposes - in production use proper auth flow
+                    const result = await auth.signInWithPopup(
+                    new firebase.auth.GoogleAuthProvider()
+                );
+                } catch (error) {
+                    console.error("Auth error:", error);
+                    authStatus.textContent = `Auth error: ${error.message}`;
+                }
+            }
+            
+            async function logoutUser() {
+                try {
+                    await firebase.auth().signOut();
+                } catch (error) {
+                    console.error("Logout error:", error);
+                }
+            }
             
             // Voice guidance function
             function speakGuidance(text) {
                 if ('speechSynthesis' in window) {
                     const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'en-US';
+                    utterance.lang = 'id-ID';
                     utterance.rate = 0.9;
                     speechSynthesis.speak(utterance);
                 }
@@ -227,6 +410,9 @@
             // Start camera
             async function startCamera() {
                 try {
+                    // Stop any existing stream
+                    stopCamera();
+                    
                     stream = await navigator.mediaDevices.getUserMedia({
                         video: { facingMode: "environment" }
                     });
@@ -252,8 +438,261 @@
                 }
             }
             
-            // Capture image
+            // Parse unstructured text (fallback)
+            function parseUnstructuredText(text) {
+                console.log("Parsing unstructured text:", text);
+                
+                // Check if text is undefined or empty
+                if (!text) {
+                    console.error("Raw text is undefined or empty");
+                    return {
+                        medicationName: "Tidak Ditemukan",
+                        activeIngredients: "Not found",
+                        dosageForm: "Not found",
+                        strength: "Not found",
+                        expirationDate: "Not found",
+                        storageInstructions: "Not found",
+                        administrationInstructions: "Not found",
+                        warnings: "Not found",
+                        manufacturer: "Not found",
+                        batchNumber: "Not found",
+                        rawTextAvailable: false
+                    };
+                }
+                
+                // Store the raw text for display
+                const result = {
+                    medicationName: extractSection(text, "Medication Name"),
+                    activeIngredients: extractSection(text, "Active Ingredients"),
+                    dosageForm: extractSection(text, "Dosage Form"),
+                    strength: extractSection(text, "Strength"),
+                    expirationDate: extractSection(text, "Expiration Date"),
+                    storageInstructions: extractSection(text, "Storage Instructions"),
+                    administrationInstructions: extractSection(text, "Administration Instructions"),
+                    warnings: extractSection(text, "Warnings"),
+                    manufacturer: extractSection(text, "Manufacturer"),
+                    batchNumber: extractSection(text, "Batch Number"),
+                    rawTextAvailable: true,
+                    rawText: text
+                };
+                
+                // Check if we found any meaningful content, otherwise try alternative strategies
+                const hasContent = Object.keys(result).some(key => 
+                    key !== 'rawText' && key !== 'rawTextAvailable' && result[key] !== "Not found"
+                );
+                
+                if (!hasContent) {
+                    console.log("Standard extraction found no content, trying alternative parsing");
+                    
+                    // Try an alternative strategy - look for lines with colons
+                    const lines = text.split('\n');
+                    for (const line of lines) {
+                        if (line.includes(':')) {
+                            const [key, value] = line.split(':', 2);
+                            const trimmedKey = key.trim().toLowerCase();
+                            const trimmedValue = value.trim();
+                            
+                            if (trimmedValue && trimmedValue.length > 1) {
+                                // Map to our expected keys if possible
+                                if (trimmedKey.includes('name') || trimmedKey.includes('medication')) {
+                                    result.medicationName = trimmedValue;
+                                } else if (trimmedKey.includes('ingredient')) {
+                                    result.activeIngredients = trimmedValue;
+                                } else if (trimmedKey.includes('form') || trimmedKey.includes('type')) {
+                                    result.dosageForm = trimmedValue;
+                                } else if (trimmedKey.includes('strength') || trimmedKey.includes('concentration') || trimmedKey.includes('dose')) {
+                                    result.strength = trimmedValue;
+                                } else if (trimmedKey.includes('expir') || trimmedKey.includes('date')) {
+                                    result.expirationDate = trimmedValue;
+                                } else if (trimmedKey.includes('storage') || trimmedKey.includes('store')) {
+                                    result.storageInstructions = trimmedValue;
+                                } else if (trimmedKey.includes('admin') || trimmedKey.includes('instruction') || trimmedKey.includes('direct')) {
+                                    result.administrationInstructions = trimmedValue;
+                                } else if (trimmedKey.includes('warning') || trimmedKey.includes('precaution') || trimmedKey.includes('caution')) {
+                                    result.warnings = trimmedValue;
+                                } else if (trimmedKey.includes('manufacturer') || trimmedKey.includes('company') || trimmedKey.includes('producer')) {
+                                    result.manufacturer = trimmedValue;
+                                } else if (trimmedKey.includes('batch') || trimmedKey.includes('lot') || trimmedKey.includes('number')) {
+                                    result.batchNumber = trimmedValue;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return result;
+            }
+            
+            // Helper to extract sections from text
+            function extractSection(text, sectionName) {
+                try {
+                    const regex = new RegExp(`${sectionName}[:\\s]+(.*?)(?=\\n\\w|$)`, 'i');
+                    const match = text.match(regex);
+                    return match ? match[1].trim() : "Not found";
+                } catch (error) {
+                    console.error(`Error extracting ${sectionName}:`, error);
+                    return "Not found";
+                }
+            }
+            
+            // Map Indonesian field names to English field names
+            function mapIndonesianToEnglishFields(data) {
+                const fieldMapping = {
+                    'namaObat': 'medicationName',
+                    'bahanAktif': 'activeIngredients',
+                    'bentukSediaan': 'dosageForm',
+                    'kekuatanKonsentrasi': 'strength',
+                    'tanggalKadaluarsa': 'expirationDate',
+                    'petunjukPenyimpanan': 'storageInstructions',
+                    'petunjukPenggunaan': 'administrationInstructions',
+                    'peringatanPerhatian': 'warnings',
+                    'produsen': 'manufacturer',
+                    'nomorBatchLot': 'batchNumber',
+                    'deskripsiPenggunaanObat': 'description',
+                    // Also add the direct Indonesian field names
+                    'Nama Obat': 'medicationName',
+                    'Bahan Aktif': 'activeIngredients',
+                    'Bentuk Sediaan': 'dosageForm',
+                    'Kekuatan/Konsentrasi': 'strength',
+                    'Tanggal Kadaluarsa': 'expirationDate',
+                    'Petunjuk Penyimpanan': 'storageInstructions',
+                    'Petunjuk Penggunaan': 'administrationInstructions',
+                    'Peringatan/Perhatian': 'warnings',
+                    'Produsen': 'manufacturer',
+                    'Nomor Batch/Lot': 'batchNumber',
+                    'Deskripsi Penggunaan Obat': 'description'
+                };
+
+                // Check if this is an Indonesian response by looking for Indonesian field names
+                const isIndonesianResponse = Object.keys(data).some(key => 
+                    Object.keys(fieldMapping).includes(key)
+                );
+
+                if (!isIndonesianResponse) {
+                    console.log("Not an Indonesian response, keeping as is");
+                    return data; // Return as is if it's not Indonesian
+                }
+
+                console.log("Mapping Indonesian fields to English");
+                
+                // Map Indonesian field names to English field names
+                const mappedData = {};
+                
+                // Process each field in the data
+                Object.keys(data).forEach(key => {
+                    const englishKey = fieldMapping[key] || key; // Use mapping or keep original
+                    const value = data[key];
+                    
+                    // Handle "Tidak ditemukan" (Indonesian for "Not found")
+                    mappedData[englishKey] = value === "Tidak ditemukan" ? "Not found" : value;
+                });
+
+                return mappedData;
+            }
+            
+            // Display medication information
+            function displayMedicationInfo(data) {
+                resultsContent.innerHTML = '';
+                
+                // Define the fields to display
+                const fields = [
+                    { key: 'medicationName', label: 'Medication Name' },
+                    { key: 'activeIngredients', label: 'Active Ingredients' },
+                    { key: 'dosageForm', label: 'Dosage Form' },
+                    { key: 'strength', label: 'Strength/Concentration' },
+                    { key: 'expirationDate', label: 'Expiration Date' },
+                    { key: 'storageInstructions', label: 'Storage Instructions' },
+                    { key: 'administrationInstructions', label: 'Administration Instructions' },
+                    { key: 'warnings', label: 'Warnings/Precautions' },
+                    { key: 'manufacturer', label: 'Manufacturer' },
+                    { key: 'batchNumber', label: 'Batch/Lot Number' },
+                    { key: 'description', label: 'Description' } // Add description field
+                ];
+                
+                let itemsDisplayed = 0;
+                
+                // Create HTML for each field
+                fields.forEach(field => {
+                    const value = data[field.key] || 'Not found';
+                    
+                    // Always show medication name and other items that aren't "Not found"
+                    if (field.key === 'medicationName' || value !== 'Not found') {
+                        const infoItem = document.createElement('div');
+                        infoItem.className = 'info-item';
+                        
+                        const heading = document.createElement('h3');
+                        heading.textContent = field.label;
+                        
+                        const content = document.createElement('p');
+                        content.textContent = value;
+                        
+                        infoItem.appendChild(heading);
+                        infoItem.appendChild(content);
+                        resultsContent.appendChild(infoItem);
+                        itemsDisplayed++;
+                    }
+                });
+                
+                // If we have raw text but couldn't extract structured data, show the raw text
+                if (itemsDisplayed <= 1 && data.rawTextAvailable) {
+                    const debugSection = document.createElement('div');
+                    debugSection.className = 'debug-section';
+                    
+                    const debugTitle = document.createElement('h3');
+                    debugTitle.textContent = 'AI Analysis Result';
+                    
+                    const debugContent = document.createElement('div');
+                    debugContent.className = 'raw-response';
+                    debugContent.textContent = data.rawText;
+                    
+                    debugSection.appendChild(debugTitle);
+                    debugSection.appendChild(debugContent);
+                    resultsContent.appendChild(debugSection);
+                }
+                
+                // Always add debug toggle if raw text is available
+                if (data.rawTextAvailable) {
+                    const debugToggle = document.createElement('button');
+                    debugToggle.className = 'debug-toggle';
+                    debugToggle.textContent = 'Show/Hide Raw AI Response';
+                    
+                    let debugVisible = false;
+                    let debugSection = null;
+                    
+                    debugToggle.addEventListener('click', function() {
+                        if (debugVisible && debugSection) {
+                            resultsContent.removeChild(debugSection);
+                            debugVisible = false;
+                        } else {
+                            debugSection = document.createElement('div');
+                            debugSection.className = 'debug-section';
+                            
+                            const debugTitle = document.createElement('h3');
+                            debugTitle.textContent = 'Raw AI Response';
+                            
+                            const debugContent = document.createElement('div');
+                            debugContent.className = 'raw-response';
+                            debugContent.textContent = data.rawText;
+                            
+                            debugSection.appendChild(debugTitle);
+                            debugSection.appendChild(debugContent);
+                            resultsContent.appendChild(debugSection);
+                            debugVisible = true;
+                        }
+                    });
+                    
+                    resultsContent.appendChild(debugToggle);
+                }
+            }
+            
+            // Capture image - enhance error handling
             captureBtn.addEventListener('click', async function() {
+                if (!currentUser) {
+                    errorMessage.textContent = "Please log in first";
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                
                 // Set canvas dimensions to match video
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
@@ -273,16 +712,24 @@
                 speakGuidance("Scanning medication label");
                 
                 try {
-                    // Send to backend
+                    // Get user ID token for authentication
+                    const idToken = await currentUser.getIdToken();
+                    
+                    // Send to backend - CORRECTED ENDPOINT PATH
                     const response = await fetch('/api/process/scan-medication', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
                         },
-                        body: JSON.stringify({ imageData })
+                        body: JSON.stringify({ 
+                            imageData,
+                            language: 'id' // Add language flag to request Indonesian response
+                        })
                     });
                     
                     const result = await response.json();
+                    console.log("API Response:", result);
                     
                     if (!response.ok || !result.success) {
                         throw new Error(result.error || 'Failed to analyze medication label');
@@ -291,8 +738,19 @@
                     // Hide loading, show results
                     loadingDiv.style.display = 'none';
                     
-                    // Store medication data
-                    medicationData = result.structured ? result.data : parseUnstructuredText(result.rawText);
+                    // Store medication data, ensuring we have the raw text
+                    if (result.structured) {
+                        // For structured responses, store the raw text if available and map Indonesian fields
+                        const mappedData = mapIndonesianToEnglishFields(result.data);
+                        medicationData = {
+                            ...mappedData, 
+                            rawTextAvailable: !!result.rawText,
+                            rawText: result.rawText || ""
+                        };
+                    } else {
+                        // For unstructured responses, parse the text
+                        medicationData = parseUnstructuredText(result.rawText);
+                    }
                     
                     // Display results
                     displayMedicationInfo(medicationData);
@@ -305,74 +763,13 @@
                     speakGuidance("Medication label scanned successfully");
                     
                 } catch (error) {
+                    console.error("API Error:", error);
                     loadingDiv.style.display = 'none';
                     errorMessage.textContent = error.message || 'An error occurred while scanning the label';
                     errorMessage.style.display = 'block';
                     speakGuidance("Error scanning label. Please try again.");
                 }
             });
-            
-            // Parse unstructured text (fallback)
-            function parseUnstructuredText(text) {
-                // Simple fallback parser - in production you might want something more robust
-                return {
-                    medicationName: extractSection(text, "Medication Name"),
-                    activeIngredients: extractSection(text, "Active Ingredients"),
-                    dosageForm: extractSection(text, "Dosage Form"),
-                    strength: extractSection(text, "Strength"),
-                    expirationDate: extractSection(text, "Expiration Date"),
-                    storageInstructions: extractSection(text, "Storage Instructions"),
-                    administrationInstructions: extractSection(text, "Administration Instructions"),
-                    warnings: extractSection(text, "Warnings"),
-                    manufacturer: extractSection(text, "Manufacturer"),
-                    batchNumber: extractSection(text, "Batch Number")
-                };
-            }
-            
-            // Helper to extract sections from text
-            function extractSection(text, sectionName) {
-                const regex = new RegExp(`${sectionName}[:\\s]+(.*?)(?=\\n\\w|$)`, 'i');
-                const match = text.match(regex);
-                return match ? match[1].trim() : "Not found";
-            }
-            
-            // Display medication information
-            function displayMedicationInfo(data) {
-                resultsContent.innerHTML = '';
-                
-                // Define the fields to display
-                const fields = [
-                    { key: 'medicationName', label: 'Medication Name' },
-                    { key: 'activeIngredients', label: 'Active Ingredients' },
-                    { key: 'dosageForm', label: 'Dosage Form' },
-                    { key: 'strength', label: 'Strength/Concentration' },
-                    { key: 'expirationDate', label: 'Expiration Date' },
-                    { key: 'storageInstructions', label: 'Storage Instructions' },
-                    { key: 'administrationInstructions', label: 'Administration Instructions' },
-                    { key: 'warnings', label: 'Warnings/Precautions' },
-                    { key: 'manufacturer', label: 'Manufacturer' },
-                    { key: 'batchNumber', label: 'Batch/Lot Number' }
-                ];
-                
-                // Create HTML for each field
-                fields.forEach(field => {
-                    const value = data[field.key] || 'Not found';
-                    if (value !== 'Not found') {
-                        const infoItem = document.createElement('div');
-                        infoItem.className = 'info-item';
-                        
-                        const heading = document.createElement('h3');
-                        heading.textContent = field.label;
-                        
-                        const content = document.createElement('p');
-                        content.textContent = value;
-                        
-                        infoItem.appendChild(heading);
-                        infoItem.appendChild(content);
-                        resultsContent.appendChild(infoItem);
-                    }
-                });
-            }
             
             // Scan again button
             scanAgainBtn.addEventListener('click', function() {
@@ -390,34 +787,51 @@
                 }
                 
                 // Create text to read
-                let textToRead = `Medication information for ${medicationData.medicationName || 'your medication'}.`;
+                let textToRead = `Informasi Medikasi ${medicationData.medicationName || 'your medication'}.`;
                 
                 if (medicationData.activeIngredients && medicationData.activeIngredients !== 'Not found') {
-                    textToRead += ` Active ingredients: ${medicationData.activeIngredients}.`;
+                    const formattedIngredients = medicationData.activeIngredients
+                        .map(item => `${item['Nama Bahan']} (${item['Kekuatan']})`)
+                        .join(', ');
+                    
+                    textToRead += ` Bahan Aktif: ${formattedIngredients}.`;
                 }
+
                 
                 if (medicationData.dosageForm && medicationData.dosageForm !== 'Not found') {
-                    textToRead += ` This is a ${medicationData.dosageForm}.`;
+                    textToRead += ` Dosis : ${medicationData.dosageForm}.`;
                 }
                 
                 if (medicationData.administrationInstructions && medicationData.administrationInstructions !== 'Not found') {
-                    textToRead += ` Administration instructions: ${medicationData.administrationInstructions}.`;
+                    textToRead += ` Intruksi Penggunaan : ${medicationData.administrationInstructions}.`;
                 }
                 
                 if (medicationData.expirationDate && medicationData.expirationDate !== 'Not found') {
-                    textToRead += ` Expiration date: ${medicationData.expirationDate}.`;
+                    textToRead += ` Tanggal Kadaluarsa : ${medicationData.expirationDate}.`;
                 }
                 
                 if (medicationData.warnings && medicationData.warnings !== 'Not found') {
-                    textToRead += ` Warnings: ${medicationData.warnings}.`;
+                    textToRead += ` Peringatan/Perhatian: ${medicationData.warnings}.`;
+                }
+                if (medicationData.storageInstructions && medicationData.storageInstructions !== 'Not found') {
+                    textToRead += ` Petunjuk Penyimpanan: ${medicationData.storageInstructions}.`;
+                }
+                if (medicationData.manufacturer && medicationData.manufacturer !== 'Not found') {
+                    textToRead += ` Produsen: ${medicationData.manufacturer}.`;
+                }
+                if (medicationData.batchNumber && medicationData.batchNumber !== 'Not found') {
+                    textToRead += ` Nomor Batch/Lot: ${medicationData.batchNumber}.`;
+                }
+                if (medicationData.description && medicationData.description !== 'Not found') {
+                    textToRead += ` Deskripsi Penggunaan Obat: ${medicationData.description}.`;
                 }
                 
+                // Create speech synthesis utterance    
                 speakGuidance(textToRead);
             });
-            
-            // Initialize
+            // Initialize Camera
             startCamera();
         });
-    </script>
-</body>
+        </script>
+    </body>
 </html>
