@@ -7,7 +7,7 @@ const { saveMedicationToFirestore } = require("../utils/saveMedicationToFirestor
 // Main Router untuk scan gambar label obat menggunakan Google Vision OCR + Gemini AI
 router.post("/scan-medication", express.json({ limit: "25mb" }), async (req, res) => {
   try {
-    const { imageData, language, customPrompt } = req.body;
+    const { imageData, language }  = req.body;
 
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith("Bearer ")) {
@@ -24,7 +24,7 @@ router.post("/scan-medication", express.json({ limit: "25mb" }), async (req, res
 
     const base64String = imageData.split(",")[1];
 
-    const { structured, data, rawText } = await processMedicationImage(base64String, language, customPrompt);
+    const { structured, data, rawText } = await processMedicationImage(base64String, language);
 
     if (!structured) {
       return res.json({ success: true, structured: false, rawText });

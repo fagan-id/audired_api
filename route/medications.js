@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const { db } = require("../firebase");
+const verifyToken = require("../utils/verifyToken");
 
 const COLLECTION_NAME = 'medications';
 
 // Get all medications
-router.get('/my/medications', async (req, res) => {
+router.get('/my',verifyToken, async (req, res) => {
     try{
         const userId = req.user?.uid;
         if(!userId){
@@ -30,7 +31,7 @@ router.get('/my/medications', async (req, res) => {
     }
 });
 // Get a medication by id
-router.get('/my/medications/:id', async (req, res) => {
+router.get('/my/:id',verifyToken, async (req, res) => {
     try{
         const userId = req.user?.uid;
         if(!userId){
@@ -60,7 +61,7 @@ router.get('/my/medications/:id', async (req, res) => {
 // Update Medication
 
 // Delete Medication
-router.delete("/my/medications/:id", async (req, res) => {
+router.delete("/my/:id",verifyToken, async (req, res) => {
     try{
         const userId = req.user?.uid;
         if(!userId){
@@ -86,4 +87,5 @@ router.delete("/my/medications/:id", async (req, res) => {
         res.status(500).json({ error: 'Failed to delete medication' });
     }
 });
+
 module.exports = router;
