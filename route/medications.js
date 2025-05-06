@@ -67,6 +67,8 @@ router.post("/my/create", verifyToken, async (req, res) => {
       }
   
       const medicationData = req.body;
+
+      // BARU BISA NERIMA STRUCTURED TEXT, TBA IN THE FUTURE BUAT NERIMA JSON JUGA -> LOGIC UDAH ADA, TINGGAL IF/ELSE
       const {firestoreId, data} = await saveMedicationToFirestoreFromText(userId, medicationData);
   
       return res.json({
