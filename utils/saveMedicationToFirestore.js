@@ -1,7 +1,7 @@
 const { db } = require("../firebase");
 
 /**
- * Simpan Data Medication yang sudah di scan dalam bentuk TEXT ke Firestore
+ * Simpan Data Medication yang sudah di scan dalam bentuk Json STRING ke Firestore
  */
 async function saveMedicationToFirestoreFromText(userId, parsedData) {
   const timestamp = new Date();
@@ -32,7 +32,7 @@ async function saveMedicationToFirestoreFromText(userId, parsedData) {
 }
 
 /**
- * Simpan Data Medication yang sudah di scan dalam bentuk JSON ke Firestore
+ * Simpan Data Medication yang sudah di scan dalam bentuk StructuredObject ke Firestore
  */
 async function saveMedicationToFirestoreFromJSON(userId, parsedData) {
   const timestamp = new Date();
