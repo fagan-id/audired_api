@@ -1,23 +1,22 @@
 const { db } = require("../firebase");
 
 /**
- * Simpan Data Medication yang sudah di scan ke Firestore
+ * Simpan Data Medication yang sudah di scan dalam bentuk TEXT ke Firestore
  */
-async function saveMedicationToFirestore(userId, parsedData) {
+async function saveMedicationToFirestoreFromText(userId, parsedData) {
   const timestamp = new Date();
 
   const medicationData = {
     userId,
     namaObat: parsedData["Nama Obat"] || "",
     bahanAktif: parsedData["Bahan Aktif"] || "",
-    bentukSediaan: parsedData["Bentuk Sediaan"] || "",
+    jenisObat: parsedData["Jenis Obat"] || "",
     kekuatanKonsentrasi: parsedData["Kekuatan/Konsentrasi"] || "",
     tanggalKadaluarsa: parsedData["Tanggal Kadaluarsa"] || "",
     petunjukPenyimpanan: parsedData["Petunjuk Penyimpanan"] || "",
-    petunjukPenggunaan: parsedData["Petunjuk Penggunaan"] || "",
+    aturanPakai: parsedData["Aturan Pakai"] || "",
     peringatanPerhatian: parsedData["Peringatan/Perhatian"] || "",
     produsen: parsedData["Produsen"] || "",
-    nomorBatchLot: parsedData["Nomor Batch/Lot"] || "",
     deskripsiPenggunaanObat: parsedData["Deskripsi Penggunaan Obat"] || "",
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -32,4 +31,36 @@ async function saveMedicationToFirestore(userId, parsedData) {
   return { firestoreId: docRef.id, medicationData };
 }
 
-module.exports = { saveMedicationToFirestore };
+/**
+ * Simpan Data Medication yang sudah di scan dalam bentuk JSON ke Firestore
+ */
+async function saveMedicationToFirestoreFromJSON(userId, parsedData) {
+  const timestamp = new Date();
+
+  const medicationData = {
+    userId,
+    namaObat: parsedData.namaObat || "",
+    bahanAktif: parsedData.bahanAktif || [],
+    jenisObat: parsedData.jenisObat || "",
+    kekuatanKonsentrasi: parsedData.kekuatanKonsentrasi || "",
+    tanggalKadaluarsa: parsedData.tanggalKadaluarsa || "",
+    petunjukPenyimpanan: parsedData.petunjukPenyimpanan || "",
+    aturanPakai: parsedData.aturanPakai || "",
+    peringatanPerhatian: parsedData.peringatanPerhatian || "",
+    produsen: parsedData.produsen || "",
+    deskripsiPenggunaanObat: parsedData.deskripsiPenggunaanObat || "",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+
+  const docRef = await db
+    .collection("users")
+    .doc(userId)
+    .collection("medications")
+    .add(medicationData);
+
+  return { firestoreId: docRef.id, medicationData };
+}
+
+
+module.exports = { saveMedicationToFirestoreFromText, saveMedicationToFirestoreFromJSON };

@@ -25,7 +25,7 @@ router.post('/google-login', async (req, res) => {
         });
       }
   
-      res.status(200).json({ message: 'Login successful', uid, email, name });
+      res.status(200).json({ message: 'Login successful', uid, email, name, token:idToken });
     } catch (error) {
       res.status(401).json({ error: 'Invalid ID token', details: error.message });
     }

@@ -24,4 +24,11 @@ function cleanJsonResponse(rawText) {
   return lines.join("\n");
 }
 
-module.exports = { cleanJsonResponse };
+function cleanExtractedText(rawText){
+  return cleanedText = rawText
+  .replace(/\n/g, ' ')              // Flatten new lines
+  .replace(/[^a-zA-Z0-9\s.,:/-]/g, '') // Strip special OCR garbage
+  .trim();
+}
+
+module.exports = { cleanJsonResponse, cleanExtractedText };

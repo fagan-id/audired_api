@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { db } = require("../firebase");
 const verifyToken = require("../utils/verifyToken");
+const { saveMedicationToFirestoreFromJSON, saveMedicationToFirestoreFromText } = require("../utils/saveMedicationToFirestore");
+
 
 const COLLECTION_NAME = 'medications';
 
@@ -57,6 +59,28 @@ router.get('/my/:id',verifyToken, async (req, res) => {
 });
 
 // Create Medication
+router.post("/my/create", verifyToken, async (req, res) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+  
+      const medicationData = req.body;
+      const {firestoreId, data} = await saveMedicationToFirestoreFromText(userId, medicationData);
+  
+      return res.json({
+        success: true,
+        structured: true,
+        data: data,
+        firestoreId,
+      });
+    } catch (error) {
+      console.error("Error creating medication:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+  
 
 // Update Medication
 

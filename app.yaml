@@ -6,10 +6,10 @@ env_variables:
   GOOGLE_GEMINI_API_KEY: "AIzaSyD3MNmnXVEmrOxRFp4sIhzWHb1VwaTiStE"
 
   #Path To Google Credentials :
-  GOOGLE_APPLICATION_CREDENTIALS: "D:/File Fagan/Study/Programming/Project/audired/gemini_api/keys/googleOCRKey.json"
+  GOOGLE_APPLICATION_CREDENTIALS: "./keys/googleOCRKey.json"
 
   # Firebase Service Account Key
-  FIREBASE_SERVICE_ACCOUNT_KEY: "D:/File Fagan/Study/Programming/Project/audired/gemini_api/keys/firebaseAccountKey.json"
+  FIREBASE_SERVICE_ACCOUNT_KEY: "./keys/firebaseAccountKey.json"
 
   #Port
   PORT: 8080

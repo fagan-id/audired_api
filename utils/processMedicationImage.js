@@ -88,20 +88,20 @@ function getIndonesianPrompt(text) {
       Harap ekstrak informasi berikut dalam format terstruktur:
       1. Nama Obat
       2. Bahan Aktif
-      3. Bentuk Sediaan (tablet, kapsul, sirup, dll)
+      3. Jenis Obat (tablet, kapsul, sirup, dll)
       4. Kekuatan/Konsentrasi
       5. Tanggal Kadaluarsa
       6. Petunjuk Penyimpanan
-      7. Petunjuk Penggunaan
-      8. Peringatan/Perhatian
+      7. Aturan Pakai
       9. Produsen
-      10. Nomor Batch/Lot
+      10.Peringatan/Perhatian
       11. Deskripsi Penggunaan Obat
 
       Aturan penting saat mengisi:
       - Jika informasi terlihat di teks OCR, ambil dari sana.
       - Jika informasi tidak terlihat/ditemukan, carilah dan gunakan pengetahuan anda!! tentang obat tersebut untuk memperkirakan informasi secara wajar.
       - Jika Anda memiliki keyakinan rendah atau tidak ada informasi sama sekali, isi dengan "Tidak ditemukan".
+      - Untuk Kolom "Aturan Pakai" memiliki template dengan contoh seperti : 3-4 Kali Sehari, Sesudah Makan
 
       Untuk Deskripsi Penggunaan Obat, buatlah deskripsi singkat, jelas, dan mudah dipahami berdasarkan jenis obat dan bahan aktifnya. Gunakan format seperti contoh berikut:  
       *"Obat ini adalah [jenis obat] yang digunakan untuk [tujuan penggunaan]. Gunakan [jumlah dosis] kali sehari, setelah/sebelum makan sesuai petunjuk dokter."*

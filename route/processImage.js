@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const { auth } = require("../firebase");
 const { processMedicationImage } = require("../utils/processMedicationImage");
-const { saveMedicationToFirestore } = require("../utils/saveMedicationToFirestore");
+const { saveMedicationToFirestoreFromText } = require("../utils/saveMedicationToFirestore");
 
 // Main Router untuk scan gambar label obat menggunakan Google Vision OCR + Gemini AI
-router.post("/scan-medication", express.json({ limit: "25mb" }), async (req, res) => {
+router.post("/scan-medication", async (req, res) => {
   try {
     const { imageData, language }  = req.body;
 
@@ -30,14 +30,15 @@ router.post("/scan-medication", express.json({ limit: "25mb" }), async (req, res
       return res.json({ success: true, structured: false, rawText });
     }
 
-    // Save the medication data to Firestore
-    const { firestoreId, medicationData } = await saveMedicationToFirestore(userId, data);
+    // // // Save the medication data to Firestore
+    // const { firestoreId, medicationData } = await saveMedicationToFirestoreFromText(userId, data);
 
     return res.json({
       success: true,
       structured: true,
-      data: medicationData,
-      firestoreId,
+      data
+      // data: medicationData, -> this is used kalo emg mau ngesave otomatis ke firebase setiap scanning
+      // firestoreId, -> buat nge-GET langsung id firebase dari data yang udah dibuat
     });
 
   } catch (err) {
@@ -45,5 +46,4 @@ router.post("/scan-medication", express.json({ limit: "25mb" }), async (req, res
     return res.status(500).json({ success: false, error: err.message });
   }
 });
-
 module.exports = router;
