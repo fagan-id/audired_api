@@ -14,9 +14,9 @@ router.post("/scan-medication", async (req, res) => {
       return res.status(401).json({ error: "Missing or invalid Authorization header" });
     }
 
-    const idToken = authHeader.split(" ")[1];
-    const decodedToken = await auth.verifyIdToken(idToken);
-    const userId = decodedToken.uid;
+    // const idToken = authHeader.split(" ")[1];
+    // const decodedToken = await auth.verifyIdToken(idToken);
+    // const userId = decodedToken.uid;
 
     if (!imageData) {
       return res.status(400).json({ error: "No image data provided" });
