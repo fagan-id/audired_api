@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 const processImageRouter = require('./route/processImage'); 
 const medicationRouter = require('./route/medications'); 
 const authRouter = require('./route/auth'); 
+// const reminderRouter = require('./route/reminder');
 
 // Middleware
 app.use(cors());
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 app.use('/api/process', processImageRouter);
 app.use('/api/medication', medicationRouter);
 app.use('/api/auth', authRouter);
+// app.use('/api/reminder', reminderRouter);
 
 // Handle root route - serve the test interface
 app.get('/', (req, res) => {
