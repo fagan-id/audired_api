@@ -15,7 +15,10 @@ const visionClient = new vision.ImageAnnotatorClient({
 async function processMedicationImage(base64String, language = "id", customPrompt = null) {
   const [visionResult] = await visionClient.annotateImage({
     image: { content: base64String },
-    features: [{ type: "TEXT_DETECTION" }],
+    features: [{ 
+      type: "DOCUMENT_TEXT_DETECTION",
+      model: "builtin/latest" 
+    }],
   });
 
   if (!visionResult.fullTextAnnotation) {

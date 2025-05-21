@@ -22,9 +22,17 @@ router.post("/scan-medication", async (req, res) => {
       return res.status(400).json({ error: "No image data provided" });
     }
 
-    const base64String = imageData.split(",")[1];
+    let base64String = imageData;
+    if (imageData.startsWith('data:image')) {
+      base64String = imageData.split(',')[1]; // Only split if data URI exists
+    }
 
-    const { structured, data, rawText } = await processMedicationImage(base64String, language);
+    // Before calling Vision API
+    if (Buffer.byteLength(base64String, 'base64') > 4 * 1024 * 1024) {
+      throw new Error("Image exceeds 4MB size limit");
+    }
+
+    const { structured, data, rawText } = await processMedicationImage(base64String, language || 'id');
 
     if (!structured) {
       return res.json({ success: true, structured: false, rawText });
