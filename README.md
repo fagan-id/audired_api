@@ -1,9 +1,12 @@
 # 👁️‍🗨️ Audired API
 
 <div align="center">
-  <img src="https://ibb.co/r2D2vYKf" alt="Audired Logo" width="120"/>
+  <img src="https://imgur.com/a/LQggxGV" alt="Audired Logo" width="120"/>
   <p><em>Helping visually impaired users identify and understand medication via voice and smart scanning</em></p>
 </div>
+
+## 📱 Deployed At  
+URL : https://audired-820e0.et.r.appspot.com/ 
 
 ## 📱 Overview
 
