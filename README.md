@@ -1,7 +1,7 @@
 # 👁️‍🗨️ Audired API
 
 <div align="center">
-  <img src="https://imgur.com/a/LQggxGV" alt="Audired Logo" width="120"/>
+  <img src="Logo.png" alt="Audired Logo" width="120"/>
   <p><em>Helping visually impaired users identify and understand medication via voice and smart scanning</em></p>
 </div>
 
